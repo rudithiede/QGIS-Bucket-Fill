@@ -1,0 +1,6 @@
+*.pyc
+*.*~
+*~
+*.swp
+copied
+original_ui_bucketfill.ui
