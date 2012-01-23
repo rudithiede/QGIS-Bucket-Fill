@@ -1,48 +1,12 @@
-# Logic from ZetCode PyGTK tutorial 
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'ui_bucketfill.ui'
 #
-# author: jan bodnar
-# website: zetcode.com 
+# Created: Fri Jan 13 09:07:11 2012
+#      by: PyQt4 UI code generator 4.8.5
+#
+# WARNING! All changes made in this file will be lost!
 
-import gtk
-
-
-class Ui_BucketFill(gtk.Window): 
-  def __init__(self):
-    super(Ui_BucketFill, self).__init__()
-    
-    self.set_size_request(300, 150)
-    self.set_position(gtk.WIN_POS_CENTER)
-    self.connect("destroy", gtk.main_quit)
-    self.set_title("Color Selection Dialog")
-    
-    
-    self.label = gtk.Label("The only victory over love is flight.")
-    button = gtk.Button("Select color")
-    button.connect("clicked", self.on_clicked)
-
-    fix = gtk.Fixed()
-    fix.put(button, 100, 30)
-    fix.put(self.label, 30, 90)
-    self.add(fix)
-
-    self.show_all()
-
-  def on_clicked(self, widget):
-    cdia = gtk.ColorSelectionDialog("Select color")
-    response = cdia.run()
-          
-    if response == gtk.RESPONSE_OK:
-      colorsel = cdia.colorsel
-      color = colorsel.get_current_color()
-      self.label.modify_fg(gtk.STATE_NORMAL, color)
-    
-    cdia.destroy()
-
-
-Ui_BucketFill()
-gtk.main()
-
-"""
 from PyQt4 import QtCore, QtGui
 
 try:
@@ -85,4 +49,3 @@ class Ui_BucketFill(object):
         pass
 
 from PyKDE4.kdeui import KColorButton
-"""
