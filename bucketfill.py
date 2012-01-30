@@ -51,14 +51,8 @@ class BucketFill:
 
     # run method that performs all the real work
     def run(self):
-
-        # create and show the dialog
-        dlg = BucketFillDialog()
-        # show the dialog
-        dlg.show()
-        result = dlg.exec_()
-        # See if OK was pressed
-        if result == 1:
-            # do something useful (delete the line containing pass and
-            # substitute with your code
+        myColorSelect = QColorDialog.getColor()
+        #myColorSelect = BucketFillDialog()
+        if QColor.isValid(myColorSelect):
+            # do something useful
             pass
