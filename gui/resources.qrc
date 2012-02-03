@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/plugins/bucketfill" >
         <file>icon.png</file>
+        <file>bucket.png</file>        
     </qresource>
 </RCC>
