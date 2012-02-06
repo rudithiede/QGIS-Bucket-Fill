@@ -16,6 +16,7 @@ __copyright__ = 'Copyright 2012, Linfiniti Consulting CC.'
 
 import os
 import sys
+from qgis import core
 from qgis.core import QgsApplication
 
 QGISAPP = None  # Static variable used to hold hand to running QGis app

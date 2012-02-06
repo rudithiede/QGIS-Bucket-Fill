@@ -21,8 +21,7 @@ from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import QPoint
 from PyQt4.QtGui import QColor
 #from PyQt4.QtTest import QTest
-from qgis.core import (
-                       QgsProviderRegistry,
+from qgis.core import (QgsProviderRegistry,
                        QgsVectorLayer,
                        QgsRasterLayer,
                        QgsMapLayerRegistry,
