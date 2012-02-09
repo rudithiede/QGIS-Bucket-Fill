@@ -25,7 +25,9 @@ from qgis.core import (QgsProviderRegistry,
                        QgsVectorLayer,
                        QgsRasterLayer,
                        QgsMapLayerRegistry,
-                       QgsCoordinateReferenceSystem)
+                       QgsCoordinateReferenceSystem,
+                       QgsPoint,
+                       QgsRectangle)
 from qgis.gui import QgsMapCanvas, QgsMapCanvasLayer
 from qgisinterface import QgisInterface
 from utilities_test import globalQgis
@@ -126,6 +128,14 @@ class BucketFillTest(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def prepareTestCanvas(self):
+        """
+        Sets parameters for a test canvas.
+        """
+        loadLayers()
+        setCanvasCrs(4326, True)
+        canvas.zoomToFullExtent()
+
     def testCanvasIsValid(self):
         """
         Check if the plugin has a valid canvas.
@@ -146,9 +156,7 @@ class BucketFillTest(unittest.TestCase):
         Test that clicking the canvas sets the current class
         color if the layer is a vector layer.
         """
-        loadLayers()
-        setCanvasCrs(4326, True)
-        canvas.zoomToFullExtent()
+        self.prepareTestCanvas()
         self.bucketFill.setColorForClass(
                                 QPoint(200, 200), QtCore.Qt.LeftButton)
         myColor = QColor(canvas.canvasPixmap().toImage().pixel(200, 20))
@@ -214,6 +222,31 @@ class BucketFillTest(unittest.TestCase):
         myList = self.bucketFill.getStyleClassList(myLayer)
         myMessage = 'Style list for layer is empty.'
         assert len(myList) > 0, myMessage
+
+    def testGetClickBbox(self):
+        """
+        Tests that a click returns a small bbox.
+        """
+        # pixel coords for fake click
+        self.prepareTestCanvas()
+        myPoint = QgsPoint(200, 200)
+        myBox = self.bucketFill.getClickBbox(myPoint)
+        myExpectedBox = QgsRectangle(199, 199, 201, 201)
+        myMessage = ('Bounding box was incorrect. Received values %s'
+                     ' Expected values %s' % (str(myBox), str(myExpectedBox)))
+        assert myBox == myExpectedBox, myMessage
+
+    def testPixelToCrsBox(self):
+        """
+        Tests that a bbox in pixel coords is converted to map coords
+        """
+        assert 1 == 0, 'Test not yet fully implemented - force failure.'
+
+    def testPixelToCrsPoint(self):
+        """
+        Tests that a point in pixel coords is converted to map coords
+        """
+        assert 1 == 0, 'Test not yet fully implemented - force failure.'
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

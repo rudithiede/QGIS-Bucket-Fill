@@ -19,6 +19,7 @@ __copyright__ = 'Copyright 2012, Linfiniti Consulting CC.'
 from PyQt4.QtCore import QObject, SIGNAL
 from PyQt4.QtGui import QAction, QIcon, QColorDialog, QColor
 from qgis.gui import QgsMapToolEmitPoint
+from qgis.core import QgsRectangle
 from qgis.core import QgsMapLayer
 # Initialize Qt resources from file resources.py
 import resources
@@ -44,7 +45,7 @@ class BucketFill:
             None
 
         """
-        self.setupActions()
+        self.initActions()
         # Add toolbar button and menu item - colour chooser
         self.iface.addToolBarIcon(self.colourChooserAction)
         self.iface.addPluginToMenu("&Bucket fill", self.colourChooserAction)
@@ -150,7 +151,18 @@ class BucketFill:
         # get style class list
         myStyles = self.getStyleClassList(myLayer)
 
-        # identify features under mouse click
+        # identify click xy on canvas (pixel coords)
+        myClickBox = self.getClickBbox(thePoint)
+
+        # convert myClickBox to map coords
+        myCrsBox = self.pixelBoxToCrsBox(myClickBox)
+
+        # get attribute list for layer
+        myAttributeList = ('bla', 'bla')
+
+        # use provider to select based on attr and bbox
+        mySelection = 'select function'
+
         # get first feature from list
         # find the class for said feature
         # clone class
@@ -186,25 +198,57 @@ class BucketFill:
         """
         Get the list of style classes in the given layer.
         """
-        if theLayer.isUsingRendererV2():
-            myRenderer = theLayer.rendererV2()
-            myType = myRenderer.type()
-            myStylesList = []
-            if myType == 'singleSymbol':
-                mySymbol = myRenderer.symbol()
-                myStylesList.append(mySymbol)
-            elif myType == 'categorizedSymbol':
-                for myCategory in myRenderer.categories():
-                    mySymbol = myCategory.symbol().clone()
-                    myStylesList.append(mySymbol)
-            elif myType == 'graduatedSymbol':
-                for myRange in myRenderer.ranges():
-                    mySymbol = myRange.symbol().clone()
-                    myStylesList.append(mySymbol)
-            else:
-                myMessage = 'Unknown symbol type.'
-                raise Exception(myMessage)
-            return myStylesList
-        else:
+        if not theLayer.isUsingRendererV2():
             myMessage = ('This plugin does not currently'
                          ' support old symbology.')
+            raise Exception(myMessage)
+
+        myRenderer = theLayer.rendererV2()
+        myType = myRenderer.type()
+        myStylesList = []
+        if myType == 'singleSymbol':
+            mySymbol = myRenderer.symbol()
+            myStylesList.append(mySymbol)
+        elif myType == 'categorizedSymbol':
+            for myCategory in myRenderer.categories():
+                mySymbol = myCategory.symbol().clone()
+                myStylesList.append(mySymbol)
+        elif myType == 'graduatedSymbol':
+            for myRange in myRenderer.ranges():
+                mySymbol = myRange.symbol().clone()
+                myStylesList.append(mySymbol)
+        else:
+            myMessage = 'Unknown symbol type.'
+            raise Exception(myMessage)
+        return myStylesList
+
+    def getClickBbox(self, thePoint):
+        """
+        Get a tiny bbox around a mouse click.
+        """
+        # get the xy coords
+        print (thePoint)
+        myX = thePoint.x()
+        myY = thePoint.y()
+
+        # create a little bbox from clicked coords
+        try:
+            myBbox = QgsRectangle()
+            myBbox.setXMinimum(myX - 1)
+            myBbox.setXMaximum(myX + 1)
+            myBbox.setYMinimum(myY - 1)
+            myBbox.setYMaximum(myY + 1)
+            return myBbox
+        except:
+            msg = 'Click coordinates could not be processed.'
+            raise Exception(msg)
+
+    def pixelToCrsBox(self, theClickBox):
+        """
+        Takes a bbox in pixel coords, converts it to a bbox in map coords.
+        """
+
+    def pixelToCrsPoint(self, theCoord):
+        """
+        Takes a pixel coord, converts it to a map coord.
+        """
