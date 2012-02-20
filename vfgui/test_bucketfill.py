@@ -16,7 +16,6 @@ __copyright__ = 'Copyright 2012, Linfiniti Consulting CC.'
 
 import os
 import unittest
-
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtCore import QPoint
 from PyQt4.QtGui import QColor
@@ -56,9 +55,6 @@ def loadLayers():
         QgsMapLayerRegistry.instance().removeMapLayer(myLayer)
 
     # Now go ahead and load our layers
-
-    # FIXME (Ole): Use environment variable
-    # FIXME (Ole): Write as a for loop as in the tests in engine
 
     myRoot = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     myData = os.path.join(myRoot, 'test_data')
@@ -240,13 +236,55 @@ class BucketFillTest(unittest.TestCase):
         """
         Tests that a bbox in pixel coords is converted to map coords
         """
-        assert 1 == 0, 'Test not yet fully implemented - force failure.'
+        self.prepareTestCanvas()
+        myPoint = QgsPoint(40, 15)
+        myBox = self.bucketFill.getClickBbox(myPoint)
+        myLayer = self.bucketFill.getActiveVectorLayer()
+        myRectangle = self.bucketFill.pixelToCrsBox(myBox, canvas, myLayer)
+        myExpectedBox = QgsRectangle(106.758705784, -6.13591899755,
+                                     106.761696484, -6.1329282975)
+        myMessage = ('Bounding box was incorrect.\n'
+            'Received values %s\n'
+            'Expected values %s' % (
+            str('%s, %s, %s, %s' % (
+                myRectangle.xMinimum(), myRectangle.yMinimum(),
+                myRectangle.xMaximum(), myRectangle.yMaximum()
+                )),
+            str('%s, %s, %s, %s' % (
+                myExpectedBox.xMinimum(), myExpectedBox.yMinimum(),
+                myExpectedBox.xMaximum(), myExpectedBox.yMaximum()
+                )),
+            ))
+        assert (
+            round(myRectangle.xMinimum(), 10) ==
+            round(myExpectedBox.xMinimum(), 10) and
+            round(myRectangle.xMaximum(), 10) ==
+            round(myExpectedBox.xMaximum(), 10) and
+            round(myRectangle.yMinimum(), 10) ==
+            round(myExpectedBox.yMinimum(), 10) and
+            round(myRectangle.yMaximum(), 10) ==
+            round(myExpectedBox.yMaximum(), 10)), myMessage
 
-    def testPixelToCrsPoint(self):
+    def testGetFirstFeature(self):
         """
-        Tests that a point in pixel coords is converted to map coords
+        Tests that a feature is returned.
         """
-        assert 1 == 0, 'Test not yet fully implemented - force failure.'
+        self.prepareTestCanvas()
+        myLayer = self.bucketFill.getActiveVectorLayer()
+        myTestBox = QgsRectangle(106.758705784, -6.13591899755,
+                                 106.761696484, -6.1329282975)
+        myFeature = self.bucketFill.getFirstFeature(myLayer, myTestBox)
+        print myFeature
+        myMessage = ('Force error for unfinished test.')
+        assert 1 == 0, myMessage
+
+    def testGetStyleForFeature(self):
+        """
+        Tests that a style is returned.
+        """
+        myMessage = ('Force error for unfinished test.')
+        assert 1 == 0, myMessage
+
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

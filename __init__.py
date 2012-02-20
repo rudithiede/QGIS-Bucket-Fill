@@ -38,5 +38,5 @@ def qgisMinimumVersion():
 
 def classFactory(iface):
     # load BucketFill class from file BucketFill
-    from gui.bucketfill import BucketFill
+    from vfgui.bucketfill import BucketFill
     return BucketFill(iface)
