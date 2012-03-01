@@ -26,7 +26,8 @@ from qgis.core import (QgsProviderRegistry,
                        QgsMapLayerRegistry,
                        QgsCoordinateReferenceSystem,
                        QgsPoint,
-                       QgsRectangle)
+                       QgsRectangle,
+                       QgsFeature)
 from qgis.gui import QgsMapCanvas, QgsMapCanvasLayer
 from qgisinterface import QgisInterface
 from utilities_test import globalQgis
@@ -256,14 +257,14 @@ class BucketFillTest(unittest.TestCase):
                 )),
             ))
         assert (
-            round(myRectangle.xMinimum(), 10) ==
-            round(myExpectedBox.xMinimum(), 10) and
-            round(myRectangle.xMaximum(), 10) ==
-            round(myExpectedBox.xMaximum(), 10) and
-            round(myRectangle.yMinimum(), 10) ==
-            round(myExpectedBox.yMinimum(), 10) and
-            round(myRectangle.yMaximum(), 10) ==
-            round(myExpectedBox.yMaximum(), 10)), myMessage
+            round(myRectangle.xMinimum(), 9) ==
+            round(myExpectedBox.xMinimum(), 9) and
+            round(myRectangle.xMaximum(), 9) ==
+            round(myExpectedBox.xMaximum(), 9) and
+            round(myRectangle.yMinimum(), 9) ==
+            round(myExpectedBox.yMinimum(), 9) and
+            round(myRectangle.yMaximum(), 9) ==
+            round(myExpectedBox.yMaximum(), 9)), myMessage
 
     def testGetFirstFeature(self):
         """
@@ -275,15 +276,17 @@ class BucketFillTest(unittest.TestCase):
                                  106.761696484, -6.1329282975)
         myFeature = self.bucketFill.getFirstFeature(myLayer, myTestBox)
         print myFeature
-        myMessage = ('Force error for unfinished test.')
-        assert 1 == 0, myMessage
+        myMessage = ('Returned object was not a feature.')
+        assert myFeature.type() == QgsFeature, myMessage
 
+'''
     def testGetStyleForFeature(self):
         """
         Tests that a style is returned.
         """
         myMessage = ('Force error for unfinished test.')
         assert 1 == 0, myMessage
+'''
 
 
 if __name__ == "__main__":
