@@ -20,8 +20,10 @@ from PyQt4.QtCore import QObject, SIGNAL
 from PyQt4.QtGui import QAction, QIcon, QColorDialog, QColor
 from qgis.gui import QgsMapToolEmitPoint
 from qgis.core import QgsRectangle
+from qgis.core import QgsPoint
 from qgis.core import QgsMapLayer
 from qgis.core import QgsCoordinateTransform
+from qgis.gui import QgsRubberBand
 # Initialize Qt resources from file resources.py
 import resources
 
@@ -33,6 +35,9 @@ class BucketFill:
         # Save reference to the QGIS interface
         self.iface = iface
         self.bucketTool = QgsMapToolEmitPoint(self.iface.mapCanvas())
+        self.polygonFlag = True
+        self.rubberband = QgsRubberBand(self.iface.mapCanvas(), self.polygonFlag)
+
 
     def initGui(self):
         """Called by QGIS to add gui elements to its Mainwindow
@@ -288,6 +293,23 @@ class BucketFill:
         myTransform = QgsCoordinateTransform(myCanvasCrs, myLayerCrs)
         myExtent = myTransform.transform(myRectangle)
         return myExtent
+
+    def makeRubberBand(self, theRectangle, theCanvas):
+        """Makes a rubber band select on the canvas where the user clicked."""
+        self.rubberband.reset(True)
+        self.rubberband = QgsRubberBand(theCanvas, True)
+        self.rubberband.addPoint(QgsPoint(\
+                                          theRectangle.xMinimum(),
+                                          theRectangle.yMinimum()))
+        self.rubberband.addPoint(QgsPoint(\
+                                          theRectangle.xMaximum(),
+                                          theRectangle.yMinimum()))
+        self.rubberband.addPoint(QgsPoint(\
+                                          theRectangle.xMaximum(),
+                                          theRectangle.yMaximum()))
+        self.rubberband.addPoint(QgsPoint(\
+                                          theRectangle.xMaximum(),
+                                          theRectangle.yMinimum()))
 
     def getFirstFeature(self, theLayer, theExtent):
         """

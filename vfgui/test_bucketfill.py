@@ -131,6 +131,7 @@ class BucketFillTest(unittest.TestCase):
         """
         loadLayers()
         setCanvasCrs(4326, True)
+        canvas.resize(QtCore.QSize(400, 400))
         canvas.zoomToFullExtent()
 
     def testCanvasIsValid(self):
@@ -238,8 +239,15 @@ class BucketFillTest(unittest.TestCase):
         Tests that a bbox in pixel coords is converted to map coords
         """
         self.prepareTestCanvas()
-        myPoint = QgsPoint(40, 15)
+        myMessage = "Plugin was not initialised with a valid canvas."
+        assert self.bucketFill.iface.mapCanvas().width() == 400 and \
+            self.bucketFill.iface.mapCanvas().height() == 400, myMessage
+        myPoint = QgsPoint(200, 200)
         myBox = self.bucketFill.getClickBbox(myPoint)
+        self.bucketFill.makeRubberBand(myBox, canvas)
+        canvas.setCanvasColor(QColor(255, 255, 255, 255))
+
+        canvas.saveAsImage('/tmp/canvas.png')
         myLayer = self.bucketFill.getActiveVectorLayer()
         myRectangle = self.bucketFill.pixelToCrsBox(myBox, canvas, myLayer)
         myExpectedBox = QgsRectangle(106.758705784, -6.13591899755,
