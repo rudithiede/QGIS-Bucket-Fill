@@ -163,12 +163,15 @@ class BucketFill:
         # convert myClickBox to map coords
         myExtent = self.pixelToCrsBox(myClickBox, myCanvas, myLayer)
 
+        # make a rubber band for visual confirmation of the click location
+        myRubberBand = self.makeRubberBand(myExtent, myCanvas)
+
         # use provider to select based on attr and bbox, and get first feature
         # from resulting list
-        myFeature = self.getFirstFeature(myLayer, myExtent)
+        #myFeature = self.getFirstFeature(myLayer, myExtent)
 
         # find the symbol for said feature
-        mySymbol = self.getSymbolForFeature(myFeature)
+        #mySymbol = self.getSymbolForFeature(myFeature)
         # clone class
         # set fill color for class
         # replace original with altered clone
@@ -275,6 +278,7 @@ class BucketFill:
         Raises:
             None
         """
+
         # converts from screen to map canvas crs
         myMapToPixel = theCanvas.getCoordinateTransform()
         myX1 = theClickBox.xMinimum()
@@ -287,11 +291,19 @@ class BucketFill:
 
         myRectangle = QgsRectangle(myPoint1, myPoint2)
 
-        # converts the click box from canvas crs to the layer's CRS
+        '''# converts the click box from canvas crs to the layer's CRS
         myCanvasCrs = theCanvas.mapRenderer().destinationCrs()
         myLayerCrs = theLayer.crs()
         myTransform = QgsCoordinateTransform(myCanvasCrs, myLayerCrs)
-        myExtent = myTransform.transform(myRectangle)
+        myExtent = myTransform.transform(myRectangle)'''
+
+        myExtent = theCanvas.mapRenderer()\
+            .mapToLayerCoordinates(theLayer, myRectangle)
+
+        print "EXTENT: %s, %s, %s, %s" % (myExtent.xMinimum(),
+                                          myExtent.yMinimum(),
+                                          myExtent.xMaximum(),
+                                          myExtent.yMaximum())
         return myExtent
 
     def makeRubberBand(self, theRectangle, theCanvas):

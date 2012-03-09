@@ -45,6 +45,8 @@ myGuiContextFlag = False
 GEOCRS = 4326  # constant for EPSG:GEOCRS Geographic CRS id
 GOOGLECRS = 900913  # constant for EPSG:GOOGLECRS Google Mercator id
 
+testBox = (106.997961788, -6.41255875216, 107.000952488, -6.40956805211)
+
 
 def loadLayers():
     """
@@ -250,8 +252,8 @@ class BucketFillTest(unittest.TestCase):
         canvas.saveAsImage('/tmp/canvas.png')
         myLayer = self.bucketFill.getActiveVectorLayer()
         myRectangle = self.bucketFill.pixelToCrsBox(myBox, canvas, myLayer)
-        myExpectedBox = QgsRectangle(106.758705784, -6.13591899755,
-                                     106.761696484, -6.1329282975)
+        myExpectedBox = QgsRectangle(testBox[0], testBox[1],
+                                     testBox[2], testBox[3])
         myMessage = ('Bounding box was incorrect.\n'
             'Received values %s\n'
             'Expected values %s' % (
@@ -280,8 +282,8 @@ class BucketFillTest(unittest.TestCase):
         """
         self.prepareTestCanvas()
         myLayer = self.bucketFill.getActiveVectorLayer()
-        myTestBox = QgsRectangle(106.758705784, -6.13591899755,
-                                 106.761696484, -6.1329282975)
+        myTestBox = QgsRectangle(testBox[0], testBox[1],
+                                 testBox[2], testBox[3])
         myFeature = self.bucketFill.getFirstFeature(myLayer, myTestBox)
         print myFeature
         myMessage = ('Returned object was not a feature.')
