@@ -35,10 +35,10 @@ class QgisInterface(QObject):
     so most methods are simply stubs.
     """
 
-    def __init__(self, canvas):
+    def __init__(self, CANVAS):
         """Constructor"""
         QObject.__init__(self)
-        self.canvas = canvas
+        self.canvas = CANVAS
 
     def zoomFull(self):
         """Zoom to the map full extent"""
@@ -79,7 +79,7 @@ class QgisInterface(QObject):
         pass
 
     def mapCanvas(self):
-        """Return a pointer to the map canvas"""
+        """Return a pointer to the map CANVAS"""
         return self.canvas
 
     def mainWindow(self):

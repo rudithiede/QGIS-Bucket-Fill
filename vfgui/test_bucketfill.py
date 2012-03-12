@@ -36,16 +36,17 @@ from bucketfill import BucketFill
 # Get QGis app handle
 QGISAPP = globalQgis()
 # Set form to test against
-parent = QtGui.QWidget()
-canvas = QgsMapCanvas(parent)
-canvas.resize(QtCore.QSize(400, 400))
+PARENT = QtGui.QWidget()
+CANVAS = QgsMapCanvas(PARENT)
+CANVAS.resize(QtCore.QSize(400, 400))
+CANVAS.refresh()
 # QgisInterface is a stub implementation of the QGIS plugin interface
-iface = QgisInterface(canvas)
-myGuiContextFlag = False
+IFACE = QgisInterface(CANVAS)
+GUI_CONTEXT_FLAG = False
 GEOCRS = 4326  # constant for EPSG:GEOCRS Geographic CRS id
 GOOGLECRS = 900913  # constant for EPSG:GOOGLECRS Google Mercator id
 
-testBox = (106.997961788, -6.41255875216, 107.000952488, -6.40956805211)
+TEST_BOX = (106.773659284, -6.13591899755, 106.776649984, -6.1329282975)
 
 
 def loadLayers():
@@ -90,30 +91,30 @@ def loadLayers():
         # Create Map Canvas Layer Instance and add to list
         myCanvasLayers.append(QgsMapCanvasLayer(myLayer))
 
-    # Add MCL's to the canvas
+    # Add MCL's to the CANVAS
     # NOTE: New layers *must* be added to the end of this list, otherwise
     #       tests will break.
-    canvas.setLayerSet(myCanvasLayers)
+    CANVAS.setLayerSet(myCanvasLayers)
 
 
 def setCanvasCrs(theEpsgId, theOtfpFlag=False):
-    """Helper to set the crs for the canvas before a test is run.
+    """Helper to set the crs for the CANVAS before a test is run.
 
     Args:
 
         * theEpsgId  - Valid EPSG identifier (int)
         * theOtfpFlag - whether on the fly projections should be enabled
-                        on the canvas. Default to False.
+                        on the CANVAS. Default to False.
     """
         # Enable on-the-fly reprojection
-    canvas.mapRenderer().setProjectionsEnabled(theOtfpFlag)
+    CANVAS.mapRenderer().setProjectionsEnabled(theOtfpFlag)
 
     # Create CRS Instance
     myCrs = QgsCoordinateReferenceSystem()
     myCrs.createFromEpsg(theEpsgId)  # google mercator
 
     # Reproject all layers to WGS84 geographic CRS
-    canvas.mapRenderer().setDestinationCrs(myCrs)
+    CANVAS.mapRenderer().setDestinationCrs(myCrs)
 
 
 class BucketFillTest(unittest.TestCase):
@@ -121,7 +122,7 @@ class BucketFillTest(unittest.TestCase):
     BucketFill Test Suite.
     """
     def setUp(self):
-        self.bucketFill = BucketFill(iface)
+        self.bucketFill = BucketFill(IFACE)
         self.bucketFill.initActions()
 
     def tearDown(self):
@@ -129,18 +130,18 @@ class BucketFillTest(unittest.TestCase):
 
     def prepareTestCanvas(self):
         """
-        Sets parameters for a test canvas.
+        Sets parameters for a test CANVAS.
         """
         loadLayers()
         setCanvasCrs(4326, True)
-        canvas.resize(QtCore.QSize(400, 400))
-        canvas.zoomToFullExtent()
+        CANVAS.resize(QtCore.QSize(400, 400))
+        CANVAS.zoomToFullExtent()
 
     def testCanvasIsValid(self):
         """
-        Check if the plugin has a valid canvas.
+        Check if the plugin has a valid CANVAS.
         """
-        myMessage = "Plugin was not initialised with a valid canvas."
+        myMessage = "Plugin was not initialised with a valid CANVAS."
         assert self.bucketFill.iface.mapCanvas().width() == 400, myMessage
 
     def testEnableBucketTool(self):
@@ -153,17 +154,17 @@ class BucketFillTest(unittest.TestCase):
 
     def testSetColorForClass(self):
         """
-        Test that clicking the canvas sets the current class
+        Test that clicking the CANVAS sets the current class
         color if the layer is a vector layer.
         """
         self.prepareTestCanvas()
-        self.bucketFill.setColorForClass(
-                                QPoint(200, 200), QtCore.Qt.LeftButton)
-        myColor = QColor(canvas.canvasPixmap().toImage().pixel(200, 20))
+        #self.bucketFill.setColorForClass(
+        #                        QPoint(50, 15), QtCore.Qt.LeftButton)
+        myColor = QColor(CANVAS.canvasPixmap().toImage().pixel(50, 15))
         # Just for if you want to see what it has rendered
-        canvas.saveAsImage('test.png')
+        CANVAS.saveAsImage('test.png')
         # expected R: 0 G: 48 B: 57
-        myExpectedColor = QColor(0, 48, 57)
+        myExpectedColor = QColor(182, 109, 194)
         myMessage = (('Unexpected color\n Received R: %i G: %i B: %i '
                     '\n Expected: R: %i G: %i B: %i') %
                       (myColor.red(),
@@ -206,7 +207,7 @@ class BucketFillTest(unittest.TestCase):
         # Now test that when a layer is loaded that we get
         # the expected response
         loadLayers()
-        canvas.zoomToFullExtent()
+        CANVAS.zoomToFullExtent()
         try:
             myLayer = self.bucketFill.getActiveVectorLayer()
         except:
@@ -229,9 +230,9 @@ class BucketFillTest(unittest.TestCase):
         """
         # pixel coords for fake click
         self.prepareTestCanvas()
-        myPoint = QgsPoint(200, 200)
+        myPoint = QgsPoint(50, 15)
         myBox = self.bucketFill.getClickBbox(myPoint)
-        myExpectedBox = QgsRectangle(199, 199, 201, 201)
+        myExpectedBox = QgsRectangle(49, 14, 51, 16)
         myMessage = ('Bounding box was incorrect. Received values %s'
                      ' Expected values %s' % (str(myBox), str(myExpectedBox)))
         assert myBox == myExpectedBox, myMessage
@@ -241,19 +242,19 @@ class BucketFillTest(unittest.TestCase):
         Tests that a bbox in pixel coords is converted to map coords
         """
         self.prepareTestCanvas()
-        myMessage = "Plugin was not initialised with a valid canvas."
+        myMessage = "Plugin was not initialised with a valid CANVAS."
         assert self.bucketFill.iface.mapCanvas().width() == 400 and \
             self.bucketFill.iface.mapCanvas().height() == 400, myMessage
-        myPoint = QgsPoint(200, 200)
+        myPoint = QgsPoint(50, 15)
         myBox = self.bucketFill.getClickBbox(myPoint)
-        self.bucketFill.makeRubberBand(myBox, canvas)
-        canvas.setCanvasColor(QColor(255, 255, 255, 255))
+        self.bucketFill.makeRubberBand(myBox, CANVAS)
 
-        canvas.saveAsImage('/tmp/canvas.png')
+        CANVAS.saveAsImage('/tmp/CANVAS.png')
         myLayer = self.bucketFill.getActiveVectorLayer()
-        myRectangle = self.bucketFill.pixelToCrsBox(myBox, canvas, myLayer)
-        myExpectedBox = QgsRectangle(testBox[0], testBox[1],
-                                     testBox[2], testBox[3])
+        myRectangle = self.bucketFill.pixelToCrsBox(myBox, CANVAS, myLayer)
+        myExpectedBox = QgsRectangle(TEST_BOX[0], TEST_BOX[1],
+                                     TEST_BOX[2], TEST_BOX[3])
+
         myMessage = ('Bounding box was incorrect.\n'
             'Received values %s\n'
             'Expected values %s' % (
@@ -282,8 +283,9 @@ class BucketFillTest(unittest.TestCase):
         """
         self.prepareTestCanvas()
         myLayer = self.bucketFill.getActiveVectorLayer()
-        myTestBox = QgsRectangle(testBox[0], testBox[1],
-                                 testBox[2], testBox[3])
+        myTestBox = QgsRectangle(TEST_BOX[0], TEST_BOX[1],
+                                 TEST_BOX[2], TEST_BOX[3])
+
         myFeature = self.bucketFill.getFirstFeature(myLayer, myTestBox)
         print myFeature
         myMessage = ('Returned object was not a feature.')

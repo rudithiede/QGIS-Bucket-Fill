@@ -31,9 +31,9 @@ import resources
 class BucketFill:
     """A little plugin to allow you to set the colour of a vector
     class by clicking on it."""
-    def __init__(self, iface):
+    def __init__(self, IFACE):
         # Save reference to the QGIS interface
-        self.iface = iface
+        self.iface = IFACE
         self.bucketTool = QgsMapToolEmitPoint(self.iface.mapCanvas())
         self.polygonFlag = True
         self.rubberband = QgsRubberBand(self.iface.mapCanvas(), self.polygonFlag)
@@ -300,10 +300,10 @@ class BucketFill:
         myExtent = theCanvas.mapRenderer()\
             .mapToLayerCoordinates(theLayer, myRectangle)
 
-        print "EXTENT: %s, %s, %s, %s" % (myExtent.xMinimum(),
-                                          myExtent.yMinimum(),
-                                          myExtent.xMaximum(),
-                                          myExtent.yMaximum())
+        print "COMPUTED EXTENT: %s, %s, %s, %s" % (myExtent.xMinimum(),
+                                                   myExtent.yMinimum(),
+                                                   myExtent.xMaximum(),
+                                                   myExtent.yMaximum())
         return myExtent
 
     def makeRubberBand(self, theRectangle, theCanvas):
@@ -349,9 +349,18 @@ class BucketFill:
 
         mySelection = myProvider.select(myAttributes,
                       theExtent, myFetchGeometryFlag, myUseIntersectFlag)
-        print ('SELECTED: %s' % mySelection)
-        myFeature = myProvider.nextFeature(mySelection)
-        return myFeature
+        print ('**********************************SELECTED: %s' % mySelection)
+        if mySelection == None:
+            raise Exception("No feature selected. Using extent %s, %s, %s, %s"
+                            % (
+                               theExtent.xMinimum(),
+                               theExtent.yMinimum(),
+                               theExtent.xMaximum(),
+                               theExtent.yMaximum()
+                             ))
+        else:
+            myFeature = myProvider.nextFeature(mySelection)
+            return myFeature
 
     def getStyleForFeature(self, theFeature):
         """

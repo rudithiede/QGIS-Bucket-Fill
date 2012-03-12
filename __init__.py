@@ -36,7 +36,7 @@ def qgisMinimumVersion():
     return "1.0"
 
 
-def classFactory(iface):
+def classFactory(IFACE):
     # load BucketFill class from file BucketFill
     from vfgui.bucketfill import BucketFill
-    return BucketFill(iface)
+    return BucketFill(IFACE)
