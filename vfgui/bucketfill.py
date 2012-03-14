@@ -26,6 +26,7 @@ from qgis.core import QgsCoordinateTransform
 from qgis.gui import QgsRubberBand
 # Initialize Qt resources from file resources.py
 import resources
+import exceptions as ex
 
 
 class BucketFill:
@@ -185,21 +186,21 @@ class BucketFill:
         Returns:
             A valid QGIS vector layer
         Raises:
-            An exception if current layer is not a vector layer
-
+            IncorrectLayerTypeException if current layer is not a vector layer
+            NoCurrentLayerException if no layer is selected.
         """
         # get active layer for canvas
         myLayer = self.iface.activeLayer()
         if myLayer is None:
             myMessage = ('There is no current layer. Load a vector layer and '
                          'select it before using it.')
-            raise Exception(myMessage)
+            raise ex.NoCurrentLayerException(myMessage)
         # check that it's a vector
         if myLayer.type() == QgsMapLayer.VectorLayer:
             return myLayer
         else:
             myMessage = 'Current layer is not a vector layer.'
-            raise Exception(myMessage)
+            raise ex.IncorrectLayerTypeException(myMessage)
 
     def getStyleClassList(self, theLayer):
         """
@@ -210,13 +211,13 @@ class BucketFill:
         Returns:
             A list of styles from the given layer.
         Raises:
-            Exception if symbol type is unknown.
-            Exception if layer uses old symbology.
+            UnknownSymbolTypeException if symbol type is unknown.
+            OldSymbologyException if layer uses old symbology.
         """
         if not theLayer.isUsingRendererV2():
             myMessage = ('This plugin does not currently'
                          ' support old symbology.')
-            raise Exception(myMessage)
+            raise ex.OldSymbologyException(myMessage)
 
         myRenderer = theLayer.rendererV2()
         myType = myRenderer.type()
@@ -234,7 +235,7 @@ class BucketFill:
                 myStylesList.append(mySymbol)
         else:
             myMessage = 'Unknown symbol type.'
-            raise Exception(myMessage)
+            raise ex.UnknownSymbolTypeException(myMessage)
         return myStylesList
 
     def getClickBbox(self, thePoint):
@@ -246,7 +247,7 @@ class BucketFill:
         Returns:
             Tiny QgsRectangle bbox around point.
         Raises:
-            Exception if bbox creation encounters error.
+            CoordinateProcessingException if bbox creation encounters error.
         """
         # get the xy coords
         print (thePoint)
@@ -263,7 +264,7 @@ class BucketFill:
             return myBbox
         except:
             msg = 'Click coordinates could not be processed.'
-            raise Exception(msg)
+            raise ex.CoordinateProcessingException(msg)
 
     def pixelToCrsBox(self, theClickBox, theCanvas, theLayer):
         """
@@ -333,14 +334,15 @@ class BucketFill:
         Returns:
             A feature.
         Raises:
-            Exception if data could not be loaded.
+            LayerLoadException if data could not be loaded.
+            NoSelectedFeatureException if no feature is selected.
         """
 
         myProvider = theLayer.dataProvider()
         if myProvider is None:
             msg = ('Could not obtain data provider from '
                'layer "%s"' % theLayer.source())
-            raise Exception(msg)
+            raise ex.LayerLoadException(msg)
 
         #myLayerExtent = theLayer.extent()
         myAttributes = myProvider.attributeIndexes()
@@ -351,7 +353,8 @@ class BucketFill:
                       theExtent, myFetchGeometryFlag, myUseIntersectFlag)
         print ('**********************************SELECTED: %s' % mySelection)
         if mySelection == None:
-            raise Exception("No feature selected. Using extent %s, %s, %s, %s"
+            raise ex.NoSelectedFeatureException(
+                            "No feature selected. Using extent %s, %s, %s, %s"
                             % (
                                theExtent.xMinimum(),
                                theExtent.yMinimum(),
