@@ -26,19 +26,19 @@ from qgis.core import QgsCoordinateTransform
 from qgis.gui import QgsRubberBand
 # Initialize Qt resources from file resources.py
 import resources
-import exceptions as ex
+import custom_exceptions as ex
 
 
 class BucketFill:
-    """A little plugin to allow you to set the colour of a vector
+    """A little plugin to allow you to set the color of a vector
     class by clicking on it."""
     def __init__(self, IFACE):
         # Save reference to the QGIS interface
         self.iface = IFACE
         self.bucketTool = QgsMapToolEmitPoint(self.iface.mapCanvas())
         self.polygonFlag = True
-        self.rubberband = QgsRubberBand(self.iface.mapCanvas(), self.polygonFlag)
-
+        self.rubberband = QgsRubberBand(self.iface.mapCanvas(),
+                                        self.polygonFlag)
 
     def initGui(self):
         """Called by QGIS to add gui elements to its Mainwindow

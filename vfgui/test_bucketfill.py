@@ -63,6 +63,7 @@ def loadLayers():
     myRoot = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
     myData = os.path.join(myRoot, 'test_data')
     myData = myData.replace('Tim Sutton', 'TIMSUT~1')
+    myData = myData.replace('Rudi Thiede', 'RUDI~1')
 
     # List all layers in the correct order.
     myFileList = ['test.shp']
@@ -163,7 +164,7 @@ class BucketFillTest(unittest.TestCase):
         myColor = QColor(CANVAS.canvasPixmap().toImage().pixel(50, 15))
         # Just for if you want to see what it has rendered
         CANVAS.saveAsImage('test.png')
-        # expected R: 0 G: 48 B: 57
+        # expected R: 182 G: 109 B: 194
         myExpectedColor = QColor(182, 109, 194)
         myMessage = (('Unexpected color\n Received R: %i G: %i B: %i '
                     '\n Expected: R: %i G: %i B: %i') %

@@ -52,10 +52,3 @@ class NoSelectedFeatureException(Exception):
     Raised if no feature is selected.
     """
     pass
-
-
-class aException(Exception):
-    """
-    Raised if
-    """
-    pass
