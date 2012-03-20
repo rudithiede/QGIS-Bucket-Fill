@@ -25,9 +25,9 @@ PY_FILES = bucketfill.py bucketfilldialog.py __init__.py
 
 EXTRAS = icon.png 
 
-UI_FILES = ui_bucketfill.py
+UI_FILES = 
 
-RESOURCE_FILES = resources.py
+RESOURCE_FILES = vfgui/resources.py
 
 default: compile
 

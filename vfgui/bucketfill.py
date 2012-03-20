@@ -24,7 +24,8 @@ from qgis.core import QgsPoint
 from qgis.core import QgsMapLayer
 from qgis.core import QgsCoordinateTransform
 from qgis.gui import QgsRubberBand
-# Initialize Qt resources from file resources.py
+# Initialize Qt resources from file resources.py dont remove this line even
+# though it is marked as unused in eclipse
 import resources
 import custom_exceptions as ex
 
@@ -54,8 +55,8 @@ class BucketFill:
         """
         self.initActions()
         # Add toolbar button and menu item - colour chooser
-        self.iface.addToolBarIcon(self.colourChooserAction)
-        self.iface.addPluginToMenu("&Bucket fill", self.colourChooserAction)
+        self.iface.addToolBarIcon(self.colorChooserAction)
+        self.iface.addPluginToMenu("&Bucket fill", self.colorChooserAction)
         # Add toolbar button and menu item - map tool
         self.iface.addToolBarIcon(self.bucketFillAction)
         self.iface.addPluginToMenu("&Bucket fill", self.bucketFillAction)
@@ -73,15 +74,15 @@ class BucketFill:
 
         """
         # Create action that will start plugin configuration
-        self.colourChooserAction = (QAction(
+        self.colorChooserAction = (QAction(
                     QIcon(":/plugins/bucketfill/icon.png"),
                     "Bucket fill", self.iface.mainWindow()))
         self.bucketFillAction = (QAction(
                     QIcon(":/plugins/bucketfill/bucket.png"),
                     "Bucket fill", self.iface.mainWindow()))
-        # connect the action to the chooseColour method
-        QObject.connect(self.colourChooserAction,
-                    SIGNAL("triggered()"), self.chooseColour)
+        # connect the action to the chooseColor method
+        QObject.connect(self.colorChooserAction,
+                    SIGNAL("triggered()"), self.chooseColor)
         QObject.connect(self.bucketFillAction,
                     SIGNAL("triggered()"), self.enableBucketTool)
         QObject.connect(self.bucketTool,
@@ -99,11 +100,12 @@ class BucketFill:
             None
 
         """
-        self.iface.removePluginMenu("&Bucket fill", self.action)
-        self.iface.removeToolBarIcon(self.action)
+        self.iface.removePluginMenu("&Bucket fill", self.colorChooserAction)
+        self.iface.removeToolBarIcon(self.colorChooserAction)
+        self.iface.removeToolBarIcon(self.bucketFillAction)
 
-    def chooseColour(self):
-        """Show a colour picker to let the user choose a colour.
+    def chooseColor(self):
+        """Show a color picker to let the user choose a color.
 
         Args:
             None
@@ -133,7 +135,7 @@ class BucketFill:
         self.iface.mapCanvas().setMapTool(self.bucketTool)
 
     def setColorForClass(self, thePoint, theButton):
-        """Set the colour of the active layer's feature
+        """Set the color of the active layer's feature
         class that falls under the cursor
 
         Args:
@@ -249,6 +251,7 @@ class BucketFill:
         Raises:
             CoordinateProcessingException if bbox creation encounters error.
         """
+
         # get the xy coords
         print (thePoint)
         myX = thePoint.x()
@@ -291,12 +294,6 @@ class BucketFill:
         myPoint2 = myMapToPixel.toMapCoordinates(myX2, myY2)
 
         myRectangle = QgsRectangle(myPoint1, myPoint2)
-
-        '''# converts the click box from canvas crs to the layer's CRS
-        myCanvasCrs = theCanvas.mapRenderer().destinationCrs()
-        myLayerCrs = theLayer.crs()
-        myTransform = QgsCoordinateTransform(myCanvasCrs, myLayerCrs)
-        myExtent = myTransform.transform(myRectangle)'''
 
         myExtent = theCanvas.mapRenderer()\
             .mapToLayerCoordinates(theLayer, myRectangle)
