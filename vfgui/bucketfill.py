@@ -16,18 +16,28 @@ __date__ = '30/01/2011'
 __copyright__ = 'Copyright 2012, Linfiniti Consulting CC.'
 
 # Import the PyQt and QGIS libraries
-from PyQt4.QtCore import QObject, SIGNAL
+from PyQt4.QtCore import QObject, SIGNAL, QSettings
 from PyQt4.QtGui import QAction, QIcon, QColorDialog, QColor
+from PyQt4.QtGui import QMessageBox
 from qgis.gui import QgsMapToolEmitPoint
 from qgis.core import QgsRectangle
 from qgis.core import QgsPoint
 from qgis.core import QgsMapLayer
 from qgis.core import QgsCoordinateTransform
 from qgis.gui import QgsRubberBand
+
 # Initialize Qt resources from file resources.py dont remove this line even
 # though it is marked as unused in eclipse
 import resources
 import custom_exceptions as ex
+
+#see if we can import pydev - see development docs for details
+try:
+    from pydevd import *
+    print 'Remote debugging is enabled.'
+    DEBUG = True
+except Exception, e:
+    print 'Debugging was disabled'
 
 
 class BucketFill:
@@ -36,9 +46,10 @@ class BucketFill:
     def __init__(self, IFACE):
         # Save reference to the QGIS interface
         self.iface = IFACE
-        self.bucketTool = QgsMapToolEmitPoint(self.iface.mapCanvas())
+        self.canvas = self.iface.mapCanvas()
+        self.bucketTool = QgsMapToolEmitPoint(self.canvas)
         self.polygonFlag = True
-        self.rubberband = QgsRubberBand(self.iface.mapCanvas(),
+        self.rubberband = QgsRubberBand(self.canvas,
                                         self.polygonFlag)
 
     def initGui(self):
@@ -115,11 +126,16 @@ class BucketFill:
             None
 
         """
-        myColorSelect = QColorDialog.getColor()
+        mySettings = QSettings()
+        try:
+            myInitialColor = mySettings.value("vectorbucketfill/current_color")
+        except:
+            myInitialColor = QColor(255, 255, 255)
+        myColor = QColorDialog.getColor(myInitialColor)
         #myColorSelect = BucketFillDialog()
-        if QColor.isValid(myColorSelect):
+        if QColor.isValid(myColor):
             # do something useful
-            pass
+            mySettings.setValue("vectorbucketfill/current_color", myColor)
 
     def enableBucketTool(self):
         """Make the bucket tool active on the canvas.
@@ -132,7 +148,7 @@ class BucketFill:
             None
 
         """
-        self.iface.mapCanvas().setMapTool(self.bucketTool)
+        self.canvas.setMapTool(self.bucketTool)
 
     def setColorForClass(self, thePoint, theButton):
         """Set the color of the active layer's feature
@@ -141,7 +157,7 @@ class BucketFill:
         Args:
 
             * thePoint - a QgsPoint indicating where the click on
-                the canvas took place.
+                the canvas took place in map coordinates of the canvas.
             * theButton - a Qt::MouseButton enumerator indicating
                 which button was clicked with
 
@@ -151,27 +167,23 @@ class BucketFill:
             None
 
         """
-        # get the canvas
-        myCanvas = self.iface.mapCanvas()
-
         # get the active layer
         myLayer = self.getActiveVectorLayer()
 
         # get style class list
         myStyles = self.getStyleClassList(myLayer)
 
-        # identify click xy on canvas (pixel coords)
+        # identify click xy on canvas (map coords)
         myClickBox = self.getClickBbox(thePoint)
-
         # convert myClickBox to map coords
-        myExtent = self.pixelToCrsBox(myClickBox, myCanvas, myLayer)
-
+        #myExtent = self.pixelToCrsBox(myClickBox, self.canvas, myLayer)
+        #settrace()
         # make a rubber band for visual confirmation of the click location
-        myRubberBand = self.makeRubberBand(myExtent, myCanvas)
+        myRubberBand = self.makeRubberBand(myClickBox)
 
         # use provider to select based on attr and bbox, and get first feature
         # from resulting list
-        #myFeature = self.getFirstFeature(myLayer, myExtent)
+        myFeature = self.getFirstFeature(myLayer, myClickBox)
 
         # find the symbol for said feature
         #mySymbol = self.getSymbolForFeature(myFeature)
@@ -253,17 +265,19 @@ class BucketFill:
         """
 
         # get the xy coords
-        print (thePoint)
+        #QMessageBox.information(None, 'VF', str(thePoint))
         myX = thePoint.x()
         myY = thePoint.y()
+        myUnitsPerPixel = self.canvas.mapUnitsPerPixel()
 
         # create a little bbox from clicked coords
         try:
             myBbox = QgsRectangle()
-            myBbox.setXMinimum(myX - 1)
-            myBbox.setYMinimum(myY - 1)
-            myBbox.setXMaximum(myX + 1)
-            myBbox.setYMaximum(myY + 1)
+            myBbox.setXMinimum(myX - myUnitsPerPixel)
+            myBbox.setYMinimum(myY - myUnitsPerPixel)
+            myBbox.setXMaximum(myX + myUnitsPerPixel)
+            myBbox.setYMaximum(myY + myUnitsPerPixel)
+            #QMessageBox.information(None, 'VF', myBbox.toString())
             return myBbox
         except:
             msg = 'Click coordinates could not be processed.'
@@ -304,10 +318,12 @@ class BucketFill:
                                                    myExtent.yMaximum())
         return myExtent
 
-    def makeRubberBand(self, theRectangle, theCanvas):
+    def makeRubberBand(self, theRectangle):
         """Makes a rubber band select on the canvas where the user clicked."""
         self.rubberband.reset(True)
-        self.rubberband = QgsRubberBand(theCanvas, True)
+        self.rubberband = QgsRubberBand(self.canvas, True)
+        self.rubberband.setColor(QColor(255, 0, 0))
+        self.rubberband.setWidth(10)
         self.rubberband.addPoint(QgsPoint(\
                                           theRectangle.xMinimum(),
                                           theRectangle.yMinimum()))
@@ -318,10 +334,10 @@ class BucketFill:
                                           theRectangle.xMaximum(),
                                           theRectangle.yMaximum()))
         self.rubberband.addPoint(QgsPoint(\
-                                          theRectangle.xMaximum(),
-                                          theRectangle.yMinimum()))
+                                          theRectangle.xMinimum(),
+                                          theRectangle.yMaximum()))
 
-    def getFirstFeature(self, theLayer, theExtent):
+    def getFirstFeature(self, theLayer, theClickBox):
         """
         Gets the first feature within the bbox in the active layer.
 
@@ -344,19 +360,28 @@ class BucketFill:
         #myLayerExtent = theLayer.extent()
         myAttributes = myProvider.attributeIndexes()
         myFetchGeometryFlag = True
-        myUseIntersectFlag = True
+        myUseIntersectFlag = False
 
+        QMessageBox.information(None, 'Provider', str(myProvider))
+        QMessageBox.information(None, 'Box', str(theClickBox))
         mySelection = myProvider.select(myAttributes,
-                      theExtent, myFetchGeometryFlag, myUseIntersectFlag)
-        print ('**********************************SELECTED: %s' % mySelection)
+                      theClickBox, myFetchGeometryFlag, myUseIntersectFlag)
+
         if mySelection == None:
             raise ex.NoSelectedFeatureException(
-                            "No feature selected. Using extent %s, %s, %s, %s"
+                            "No feature selected. Using "
+                            "provider {%s}, "
+                            "attributes {%s}, and "
+                            "rectangle {%s} with "
+                            "extents {%s, %s, %s, %s}."
                             % (
-                               theExtent.xMinimum(),
-                               theExtent.yMinimum(),
-                               theExtent.xMaximum(),
-                               theExtent.yMaximum()
+                               str(myProvider),
+                               str(myAttributes),
+                               str(theClickBox),
+                               theClickBox.xMinimum(),
+                               theClickBox.yMinimum(),
+                               theClickBox.xMaximum(),
+                               theClickBox.yMaximum()
                              ))
         else:
             myFeature = myProvider.nextFeature(mySelection)
