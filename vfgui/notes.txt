@@ -1,0 +1,20 @@
+from VectorBucketFill.vfgui.bucketfill import BucketFill
+c = qgis.utils.iface.mapCanvas()
+b = BucketFill(qgis.utils.iface)
+p = QgsPoint(200, 200)
+pr = b.getClickBbox(p)
+mr = b.pixelToCrsBox(pr, c, qgis.utils.iface.activeLayer())
+
+b.makeRubberBand(r,c)
+
+
+
+from qgis.gui import QgsRubberBand
+from PyQt4.QtGui import QColor
+rb = QgsRubberBand(c, True)
+rb.setColor(QColor(255, 0, 0))
+rb.setWidth(10)
+rb.addPoint(QgsPoint(mr.xMinimum(),mr.yMinimum()))
+rb.addPoint(QgsPoint(mr.xMaximum(),mr.yMinimum()))
+rb.addPoint(QgsPoint(mr.xMaximum(),mr.yMaximum()))
+rb.addPoint(QgsPoint(mr.xMinimum(),mr.yMaximum()))

@@ -128,10 +128,12 @@ class BucketFill:
         """
         mySettings = QSettings()
         try:
-            myInitialColor = mySettings.value("vectorbucketfill/current_color")
+            myInitialColor = QColor(mySettings
+                .value("vectorbucketfill/current_color"))
         except:
             myInitialColor = QColor(255, 255, 255)
-        myColor = QColorDialog.getColor(myInitialColor)
+        #myColor = QColor()
+        myColor = QColorDialog.getColor(initial=myInitialColor)
         #myColorSelect = BucketFillDialog()
         if QColor.isValid(myColor):
             # do something useful
