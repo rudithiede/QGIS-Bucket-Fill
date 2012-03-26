@@ -4,3 +4,7 @@
 *.swp
 copied
 original_ui_bucketfill.ui
+.project
+.pydevproject
+.settings/
+test.*
