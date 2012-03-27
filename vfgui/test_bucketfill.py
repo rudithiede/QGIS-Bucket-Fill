@@ -233,50 +233,29 @@ class BucketFillTest(unittest.TestCase):
         self.prepareTestCanvas()
         myPoint = QgsPoint(50, 15)
         myBox = self.bucketFill.getClickBbox(myPoint)
-        myExpectedBox = QgsRectangle(49, 14, 51, 16)
+        myExpectedBox = QgsRectangle(49.99850465,
+                                     14.99850465,
+                                     50.00149535,
+                                     15.00149535)
         myMessage = ('Bounding box was incorrect. Received values %s'
-                     ' Expected values %s' % (str(myBox), str(myExpectedBox)))
-        assert myBox == myExpectedBox, myMessage
-
-    def testPixelToCrsBox(self):
-        """
-        Tests that a bbox in pixel coords is converted to map coords
-        """
-        self.prepareTestCanvas()
-        myMessage = "Plugin was not initialised with a valid CANVAS."
-        assert self.bucketFill.iface.mapCanvas().width() == 400 and \
-            self.bucketFill.iface.mapCanvas().height() == 400, myMessage
-        myPoint = QgsPoint(50, 15)
-        myBox = self.bucketFill.getClickBbox(myPoint)
-        self.bucketFill.makeRubberBand(myBox, CANVAS)
-
-        CANVAS.saveAsImage('/tmp/CANVAS.png')
-        myLayer = self.bucketFill.getActiveVectorLayer()
-        myRectangle = self.bucketFill.pixelToCrsBox(myBox, CANVAS, myLayer)
-        myExpectedBox = QgsRectangle(TEST_BOX[0], TEST_BOX[1],
-                                     TEST_BOX[2], TEST_BOX[3])
-
-        myMessage = ('Bounding box was incorrect.\n'
-            'Received values %s\n'
-            'Expected values %s' % (
-            str('%s, %s, %s, %s' % (
-                myRectangle.xMinimum(), myRectangle.yMinimum(),
-                myRectangle.xMaximum(), myRectangle.yMaximum()
-                )),
-            str('%s, %s, %s, %s' % (
-                myExpectedBox.xMinimum(), myExpectedBox.yMinimum(),
-                myExpectedBox.xMaximum(), myExpectedBox.yMaximum()
-                )),
-            ))
-        assert (
-            round(myRectangle.xMinimum(), 9) ==
-            round(myExpectedBox.xMinimum(), 9) and
-            round(myRectangle.xMaximum(), 9) ==
-            round(myExpectedBox.xMaximum(), 9) and
-            round(myRectangle.yMinimum(), 9) ==
-            round(myExpectedBox.yMinimum(), 9) and
-            round(myRectangle.yMaximum(), 9) ==
-            round(myExpectedBox.yMaximum(), 9)), myMessage
+                     ' Expected values %s' % (
+                        str('%s, %s, %s, %s' % (
+                            myBox.xMinimum(), myBox.yMinimum(),
+                            myBox.xMaximum(), myBox.yMaximum()
+                            )),
+                        str('%s, %s, %s, %s' % (
+                            myExpectedBox.xMinimum(), myExpectedBox.yMinimum(),
+                            myExpectedBox.xMaximum(), myExpectedBox.yMaximum()
+                            ))
+                    ))
+        assert (round(myBox.xMinimum(), 9) ==
+                round(myExpectedBox.xMinimum(), 9) and
+                round(myBox.xMaximum(), 9) ==
+                round(myExpectedBox.xMaximum(), 9) and
+                round(myBox.yMinimum(), 9) ==
+                round(myExpectedBox.yMinimum(), 9) and
+                round(myBox.yMaximum(), 9) ==
+                round(myExpectedBox.yMaximum(), 9)), myMessage
 
     def testGetFirstFeature(self):
         """
@@ -292,14 +271,14 @@ class BucketFillTest(unittest.TestCase):
         myMessage = ('Returned object was not a feature.')
         assert myFeature.type() == QgsFeature, myMessage
 
-'''
+"""
     def testGetStyleForFeature(self):
-        """
+        '''
         Tests that a style is returned.
-        """
+        '''
         myMessage = ('Force error for unfinished test.')
         assert 1 == 0, myMessage
-'''
+"""
 
 
 if __name__ == "__main__":

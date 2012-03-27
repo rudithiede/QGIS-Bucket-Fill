@@ -37,7 +37,7 @@ try:
     print 'Remote debugging is enabled.'
     DEBUG = True
 except Exception, e:
-    print 'Debugging was disabled'
+    print 'Debugging was disabled.'
 
 
 class BucketFill:
@@ -361,11 +361,12 @@ class BucketFill:
 
         #myLayerExtent = theLayer.extent()
         myAttributes = myProvider.attributeIndexes()
-        myFetchGeometryFlag = True
+        myFetchGeometryFlag = False
         myUseIntersectFlag = False
 
         QMessageBox.information(None, 'Provider', str(myProvider))
         QMessageBox.information(None, 'Box', str(theClickBox))
+        self.rubberband.reset(True)
         mySelection = myProvider.select(myAttributes,
                       theClickBox, myFetchGeometryFlag, myUseIntersectFlag)
 
