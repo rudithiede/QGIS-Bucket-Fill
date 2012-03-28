@@ -23,6 +23,7 @@ from qgis.gui import QgsMapToolEmitPoint
 from qgis.core import QgsRectangle
 from qgis.core import QgsPoint
 from qgis.core import QgsMapLayer
+from qgis.core import QgsFeature
 from qgis.core import QgsCoordinateTransform
 from qgis.gui import QgsRubberBand
 
@@ -360,6 +361,7 @@ class BucketFill:
             raise ex.LayerLoadException(msg)
 
         #myLayerExtent = theLayer.extent()
+        myProvider.rewind()
         myAttributes = myProvider.attributeIndexes()
         myFetchGeometryFlag = False
         myUseIntersectFlag = False
@@ -369,22 +371,33 @@ class BucketFill:
         self.rubberband.reset(True)
         mySelection = myProvider.select(myAttributes,
                       theClickBox, myFetchGeometryFlag, myUseIntersectFlag)
+        mySelection = myProvider.select(myAttributes,
+                      theClickBox, False)
+
+
+        #theLayer.select([])  # we don't actually need the attributes
+        #theLayer.setSelectedFeatures([myF.id() for myF in theLayer])
+            # select all the feature ids
 
         if mySelection == None:
+            myFeatureCount = theLayer.featureCount()
             raise ex.NoSelectedFeatureException(
                             "No feature selected. Using "
                             "provider {%s}, "
                             "attributes {%s}, and "
                             "rectangle {%s} with "
-                            "extents {%s, %s, %s, %s}."
+                            "extents {%s, %s, %s, %s}. "
+                            "Layer has %s features in total."
                             % (
                                str(myProvider),
-                               str(myAttributes),
+                               #str(myAttributes),
+                               "attrs",
                                str(theClickBox),
                                theClickBox.xMinimum(),
                                theClickBox.yMinimum(),
                                theClickBox.xMaximum(),
-                               theClickBox.yMaximum()
+                               theClickBox.yMaximum(),
+                               str(myFeatureCount)
                              ))
         else:
             myFeature = myProvider.nextFeature(mySelection)

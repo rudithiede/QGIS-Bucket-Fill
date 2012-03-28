@@ -266,10 +266,15 @@ class BucketFillTest(unittest.TestCase):
         myTestBox = QgsRectangle(TEST_BOX[0], TEST_BOX[1],
                                  TEST_BOX[2], TEST_BOX[3])
 
-        myFeature = self.bucketFill.getFirstFeature(myLayer, myTestBox)
-        print myFeature
-        myMessage = ('Returned object was not a feature.')
-        assert myFeature.type() == QgsFeature, myMessage
+        myFeatureCount = myLayer.featureCount()
+        if myFeatureCount > 0:
+            myFeature = self.bucketFill.getFirstFeature(myLayer, myTestBox)
+            print myFeature
+            myMessage = ('Returned object was not a feature.')
+            assert myFeature.type() == QgsFeature, myMessage
+        else:
+            myMessage = ('No features found in layer.')
+            assert 1 == 0, myMessage
 
 """
     def testGetStyleForFeature(self):
